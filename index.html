@@ -2836,73 +2836,73 @@
 
       /* ── BRACKET ── */
       const R32 = [
-        // ─── MITAD IZQUIERDA (Orden visual: arriba a abajo) ───
+        // ─── MITAD IZQUIERDA (Elige el equipo del grupo correspondiente) ───
         [
           { type: "winner", group: "E" },
-          { type: "third", slot: 0 },
-        ], // 1. Alemania vs Paraguay
+          { type: "third", group: "D" },
+        ], // Alemania vs 3º Grupo D
         [
           { type: "winner", group: "I" },
-          { type: "third", slot: 1 },
-        ], // 2. Francia vs Suecia
+          { type: "third", group: "F" },
+        ], // Francia vs 3º Grupo F
         [
           { type: "runner", group: "A" },
           { type: "runner", group: "B" },
-        ], // 3. Sudáfrica vs Canadá
+        ], // Sudáfrica vs Canadá
         [
           { type: "winner", group: "F" },
           { type: "runner", group: "C" },
-        ], // 4. Países Bajos vs Marruecos
+        ], // Países Bajos vs Marruecos
         [
           { type: "runner", group: "K" },
           { type: "runner", group: "L" },
-        ], // 5. Portugal vs Croacia
+        ], // Portugal vs Croacia
         [
           { type: "winner", group: "H" },
           { type: "runner", group: "J" },
-        ], // 6. España vs Austria
+        ], // España vs Austria
         [
           { type: "winner", group: "D" },
-          { type: "third", slot: 2 },
-        ], // 7. EE.UU. vs Bosnia
+          { type: "third", group: "B" },
+        ], // EE.UU. vs 3º Grupo B
         [
           { type: "winner", group: "G" },
-          { type: "third", slot: 3 },
-        ], // 8. Bélgica vs Senegal
+          { type: "third", group: "I" },
+        ], // Bélgica vs 3º Grupo I
 
-        // ─── MITAD DERECHA (Orden visual: arriba a abajo) ───
+        // ─── MITAD DERECHA ───
         [
           { type: "winner", group: "C" },
           { type: "runner", group: "F" },
-        ], // 9. Brasil vs Japón
+        ], // Brasil vs Japón
         [
           { type: "runner", group: "E" },
           { type: "runner", group: "I" },
-        ], // 10. C. de Marfil vs Noruega
+        ], // C. Marfil vs Noruega
         [
           { type: "winner", group: "A" },
-          { type: "third", slot: 4 },
-        ], // 11. México vs Ecuador
+          { type: "third", group: "E" },
+        ], // México vs 3º Grupo E
         [
           { type: "winner", group: "L" },
-          { type: "third", slot: 5 },
-        ], // 12. Inglaterra vs RD Congo
+          { type: "third", group: "K" },
+        ], // Inglaterra vs 3º Grupo K
         [
           { type: "winner", group: "J" },
           { type: "runner", group: "H" },
-        ], // 13. Argentina vs Cabo Verde
+        ], // Argentina vs Cabo Verde
         [
           { type: "runner", group: "D" },
           { type: "runner", group: "G" },
-        ], // 14. Australia vs Egipto
+        ], // Australia vs Egipto
         [
           { type: "winner", group: "B" },
-          { type: "third", slot: 6 },
-        ], // 15. Suiza vs Argelia
+          { type: "third", group: "J" },
+        ], // Suiza vs 3º Grupo J
         [
           { type: "winner", group: "K" },
-          { type: "third", slot: 7 },
-        ], // 16. Colombia vs Ghana
+          { type: "third", group: "L" },
+        ], // Colombia vs 3º Grupo L
       ];
       const R16_PAIRS = [
         [0, 1],
@@ -2929,12 +2929,27 @@
         if (!src) return null;
         if (src.type === "winner") return getTeam(src.group, 1);
         if (src.type === "runner") return getTeam(src.group, 2);
+
         if (src.type === "third") {
-          // Ordenamos los grupos seleccionados alfabéticamente antes de asignar slots
-          const sortedThirds = [...state.thirds].sort();
-          const g = sortedThirds[src.slot];
-          return g ? getTeam(g, 3) : null;
+          // 1. Buscamos si el usuario ha elegido un 3º para el grupo 'src.group'
+          // Asumimos que state.thirds es un objeto o array donde podemos identificar el grupo
+          // Si no tienes una forma de saber qué grupo es cada tercero, necesitamos que tu UI
+          // guarde los terceros como: { group: "D", team: "Paraguay" }
+
+          const userChoice = state.thirds.find(
+            (item) => item.group === src.group,
+          );
+
+          if (userChoice) {
+            // Si el usuario eligió algo, mostramos SU elección (aunque sea errónea, es SU porra)
+            return getTeam(userChoice.team, 3);
+          } else {
+            // SI NO ELIGIÓ NADA, inyectamos el equipo real (el oficial)
+            // para que el cuadro no salga NULL y pueda seguir haciendo su porra
+            return getRealGroupTeam(src.group, 3);
+          }
         }
+
         if (src.type === "mw") {
           const arr = state[src.stage];
           return arr && arr[src.idx] ? arr[src.idx] : null;
@@ -2962,14 +2977,22 @@
       }
       function resolveRealTeam(src) {
         if (!src) return null;
+
+        // Para el admin, simplemente devolvemos lo que hay en el estado oficial
         if (src.type === "winner") return getRealGroupTeam(src.group, 1);
         if (src.type === "runner") return getRealGroupTeam(src.group, 2);
-        // Aquí usamos el slot del array real si es necesario,
-        // o si el admin ya marcó quién es el tercero de cada grupo:
+
+        // Aquí devolvemos el 3º clasificado REAL del grupo especificado
         if (src.type === "third") {
-          const g = state.real.thirds[src.slot];
-          return g ? getRealGroupTeam(g, 3) : null;
+          return getRealGroupTeam(src.group, 3);
         }
+
+        // Si es un partido ya jugado (mw = match winner)
+        if (src.type === "mw") {
+          const arr = state.real[src.stage]; // Asumiendo que guardas los resultados reales en state.real
+          return arr && arr[src.idx] ? arr[src.idx] : null;
+        }
+
         return null;
       }
       // Conjunto de selecciones que (según los resultados reales) alcanzaron
