@@ -2836,73 +2836,25 @@
 
       /* ── BRACKET ── */
       const R32 = [
-        // ─── MITAD IZQUIERDA (Elige el equipo del grupo correspondiente) ───
-        [
-          { type: "winner", group: "E" },
-          { type: "third", group: "D" },
-        ], // Alemania vs 3º Grupo D
-        [
-          { type: "winner", group: "I" },
-          { type: "third", group: "F" },
-        ], // Francia vs 3º Grupo F
-        [
-          { type: "runner", group: "A" },
-          { type: "runner", group: "B" },
-        ], // Sudáfrica vs Canadá
-        [
-          { type: "winner", group: "F" },
-          { type: "runner", group: "C" },
-        ], // Países Bajos vs Marruecos
-        [
-          { type: "runner", group: "K" },
-          { type: "runner", group: "L" },
-        ], // Portugal vs Croacia
-        [
-          { type: "winner", group: "H" },
-          { type: "runner", group: "J" },
-        ], // España vs Austria
-        [
-          { type: "winner", group: "D" },
-          { type: "third", group: "B" },
-        ], // EE.UU. vs 3º Grupo B
-        [
-          { type: "winner", group: "G" },
-          { type: "third", group: "I" },
-        ], // Bélgica vs 3º Grupo I
+        // ─── MITAD IZQUIERDA ───
+        [{ winner: "E" }, { third: "D" }], // 1. 1ºE vs 3ºD
+        [{ winner: "I" }, { third: "F" }], // 2. 1ºI vs 3ºF
+        [{ runner: "A" }, { runner: "B" }], // 3. 2ºA vs 2ºB
+        [{ winner: "F" }, { runner: "C" }], // 4. 1ºF vs 2ºC
+        [{ runner: "K" }, { runner: "L" }], // 5. 2ºK vs 2ºL
+        [{ winner: "H" }, { runner: "J" }], // 6. 1ºH vs 2ºJ
+        [{ winner: "D" }, { third: "B" }], // 7. 1ºD vs 3ºB
+        [{ winner: "G" }, { third: "I" }], // 8. 1ºG vs 3ºI
 
         // ─── MITAD DERECHA ───
-        [
-          { type: "winner", group: "C" },
-          { type: "runner", group: "F" },
-        ], // Brasil vs Japón
-        [
-          { type: "runner", group: "E" },
-          { type: "runner", group: "I" },
-        ], // C. Marfil vs Noruega
-        [
-          { type: "winner", group: "A" },
-          { type: "third", group: "E" },
-        ], // México vs 3º Grupo E
-        [
-          { type: "winner", group: "L" },
-          { type: "third", group: "K" },
-        ], // Inglaterra vs 3º Grupo K
-        [
-          { type: "winner", group: "J" },
-          { type: "runner", group: "H" },
-        ], // Argentina vs Cabo Verde
-        [
-          { type: "runner", group: "D" },
-          { type: "runner", group: "G" },
-        ], // Australia vs Egipto
-        [
-          { type: "winner", group: "B" },
-          { type: "third", group: "J" },
-        ], // Suiza vs 3º Grupo J
-        [
-          { type: "winner", group: "K" },
-          { type: "third", group: "L" },
-        ], // Colombia vs 3º Grupo L
+        [{ winner: "C" }, { runner: "F" }], // 9. 1ºC vs 2ºF
+        [{ runner: "E" }, { runner: "I" }], // 10. 2ºE vs 2ºI
+        [{ winner: "A" }, { third: "E" }], // 11. 1ºA vs 3ºE
+        [{ winner: "L" }, { third: "K" }], // 12. 1ºL vs 3ºK
+        [{ winner: "J" }, { runner: "H" }], // 13. 1ºJ vs 2ºH
+        [{ runner: "D" }, { runner: "G" }], // 14. 2ºD vs 2ºG
+        [{ winner: "B" }, { third: "J" }], // 15. 1ºB vs 3ºJ
+        [{ winner: "K" }, { third: "L" }], // 16. 1ºK vs 3ºL
       ];
       const R16_PAIRS = [
         [0, 1],
@@ -2925,34 +2877,21 @@
         [2, 3],
       ];
 
-      function resolveTeam(src) {
-        if (!src) return null;
-        if (src.type === "winner") return getTeam(src.group, 1);
-        if (src.type === "runner") return getTeam(src.group, 2);
+      function resolveTeam(match) {
+        // match es por ejemplo { winner: "E" } o { third: "D" }
+        if (match.winner) return getTeam(match.winner, 1);
+        if (match.runner) return getTeam(match.runner, 2);
 
-        if (src.type === "third") {
-          // 1. Buscamos si el usuario ha elegido un 3º para el grupo 'src.group'
-          // Asumimos que state.thirds es un objeto o array donde podemos identificar el grupo
-          // Si no tienes una forma de saber qué grupo es cada tercero, necesitamos que tu UI
-          // guarde los terceros como: { group: "D", team: "Paraguay" }
+        if (match.third) {
+          const group = match.third;
+          // Buscamos si el usuario eligió el 3º de este grupo concreto
+          const userChoice = state.thirds.find((item) => item.group === group);
 
-          const userChoice = state.thirds.find(
-            (item) => item.group === src.group,
-          );
-
-          if (userChoice) {
-            // Si el usuario eligió algo, mostramos SU elección (aunque sea errónea, es SU porra)
-            return getTeam(userChoice.team, 3);
-          } else {
-            // SI NO ELIGIÓ NADA, inyectamos el equipo real (el oficial)
-            // para que el cuadro no salga NULL y pueda seguir haciendo su porra
-            return getRealGroupTeam(src.group, 3);
-          }
-        }
-
-        if (src.type === "mw") {
-          const arr = state[src.stage];
-          return arr && arr[src.idx] ? arr[src.idx] : null;
+          // Si eligió, devolvemos su elección. Si no, devolvemos el equipo REAL
+          // para que la porra no se rompa y el cuadro esté completo.
+          return userChoice
+            ? getTeam(userChoice.team, 3)
+            : getRealTeam(group, 3);
         }
         return null;
       }
