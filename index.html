@@ -3117,23 +3117,40 @@
         return impossible;
       }
 
-      function isFieldEditable(stage) {
-        // Retorna true si ese campo PUEDE ser editado
-        // Solo puedes editar lo imposible
+      function hasLegacyKnockoutData() {
+        const hasR32Data = (state.r32 || []).some(
+          (x) => x !== null && x !== undefined,
+        );
+        const hasR16Data = (state.r16 || []).some(
+          (x) => x !== null && x !== undefined,
+        );
+        const hasQFData = (state.qf || []).some(
+          (x) => x !== null && x !== undefined,
+        );
+        const hasSFData = (state.sf || []).some(
+          (x) => x !== null && x !== undefined,
+        );
+        const hasFinalData = !!(state.final && state.final[0]);
+        return (
+          hasR32Data || hasR16Data || hasQFData || hasSFData || hasFinalData
+        );
+      }
+
+      function hasLegacyInconsistencies() {
+        if (!hasLegacyKnockoutData()) return false;
         const impossible = detectImpossibilities();
-        return impossible[stage] === true;
+        return impossible.sf || impossible.final;
+      }
+
+      function isFieldEditable(stage) {
+        // En eliminatorias dejamos editar para poder corregir porras antiguas
+        // después del arreglo de cruces. El control de imposibles se mantiene
+        // al elegir ganador (canTeamsMeetAt).
+        if (["r32", "r16", "qf", "sf", "final"].includes(stage)) return true;
+        return true;
       }
 
       function pickWinner(stage, idx, team) {
-        // Validar si se PUEDE editar este campo
-        if (!isFieldEditable(stage)) {
-          // Este campo no está imposible, no se puede editar
-          alert(
-            `🔒 Esta porra es VÁLIDA.\n\nNo se puede editar.\n\nSolo se pueden corregir datos imposibles.`,
-          );
-          return;
-        }
-
         // Validar que el equipo sea compatible
         const pair = {
           r16: R16_PAIRS,
@@ -3168,21 +3185,18 @@
 
       function buildBracket(containerId, matches, stageKey, title) {
         const c = document.getElementById(containerId);
-        const isLocked = !isFieldEditable(stageKey);
-        const lockMsg = isLocked
-          ? '<div style="font-size:11px;color:var(--accent);margin-bottom:8px;font-weight:600;">🔒 Bloqueado - Porra válida</div>'
-          : '<div style="font-size:11px;color:#f7631b;margin-bottom:8px;font-weight:600;">⚠️ EDITABLE - Corrige los datos imposibles</div>';
+        const needsReview = hasLegacyInconsistencies();
+        const reviewMsg = needsReview
+          ? '<div style="font-size:11px;color:#f7631b;margin-bottom:8px;font-weight:600;">⚠️ Esta porra tenía cruces heredados: revisa y corrige si hace falta</div>'
+          : '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;">Selecciona el ganador de cada cruce</div>';
 
-        c.innerHTML = `<div class="round-title">${title}</div>${lockMsg}`;
+        c.innerHTML = `<div class="round-title">${title}</div>${reviewMsg}`;
         matches.forEach((m, i) => {
           const t1 = resolveTeam(m[0]),
             t2 = resolveTeam(m[1]),
             winner = getW(stageKey, i);
           const card = document.createElement("div");
           card.className = "match-card";
-          const lockClass = isLocked
-            ? ' style="opacity:0.5;cursor:not-allowed;"'
-            : "";
           card.innerHTML = `<div class="match-header">Partido ${i + 1}</div>`;
           [
             [t1, 0],
@@ -3196,8 +3210,6 @@
                 : winner && t
                   ? " loser"
                   : "");
-            if (isLocked) row.style.cursor = "not-allowed";
-            if (isLocked) row.style.opacity = "0.5";
 
             if (t) {
               row.innerHTML = `<span class="mflag">${t.f}</span><span class="mname">${t.n}</span>${winner && winner.n === t.n ? '<span class="win-icon">✓</span>' : ""}`;
