@@ -2876,6 +2876,18 @@
         [0, 1],
         [2, 3],
       ];
+      function getRealTeam(group, type) {
+        // Si tu función getTeam lee del objeto 'state',
+        // esta simplemente lee del objeto 'state.real'
+        const realData = state.real;
+
+        // Aquí usamos la misma lógica que tu función getTeam oficial
+        // (Asegúrate de que 'realData' contenga los mismos campos que tu 'state' principal)
+        if (realData && realData.groups && realData.groups[group]) {
+          return realData.groups[group][type - 1]; // Ajusta el índice si tu getTeam lo requiere
+        }
+        return null;
+      }
 
       function resolveTeam(match) {
         // match es por ejemplo { winner: "E" } o { third: "D" }
