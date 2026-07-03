@@ -2836,7 +2836,7 @@
 
       /* ── BRACKET ── */
       const R32 = [
-        // ─── MITAD IZQUIERDA (De arriba a abajo, tal cual tu foto) ───
+        // ─── MITAD IZQUIERDA (Orden visual: arriba a abajo) ───
         [
           { type: "winner", group: "E" },
           { type: "third", slot: 0 },
@@ -2870,7 +2870,7 @@
           { type: "third", slot: 3 },
         ], // 8. Bélgica vs Senegal
 
-        // ─── MITAD DERECHA (De arriba a abajo, tal cual tu foto) ───
+        // ─── MITAD DERECHA (Orden visual: arriba a abajo) ───
         [
           { type: "winner", group: "C" },
           { type: "runner", group: "F" },
@@ -2930,7 +2930,9 @@
         if (src.type === "winner") return getTeam(src.group, 1);
         if (src.type === "runner") return getTeam(src.group, 2);
         if (src.type === "third") {
-          const g = state.thirds[src.slot];
+          // Ordenamos los grupos seleccionados alfabéticamente antes de asignar slots
+          const sortedThirds = [...state.thirds].sort();
+          const g = sortedThirds[src.slot];
           return g ? getTeam(g, 3) : null;
         }
         if (src.type === "mw") {
@@ -2962,8 +2964,12 @@
         if (!src) return null;
         if (src.type === "winner") return getRealGroupTeam(src.group, 1);
         if (src.type === "runner") return getRealGroupTeam(src.group, 2);
-        // Los "mejores terceros" reales no tienen asignación de slot hasta que
-        // el admin marque clasificados, así que quedan por definir.
+        // Aquí usamos el slot del array real si es necesario,
+        // o si el admin ya marcó quién es el tercero de cada grupo:
+        if (src.type === "third") {
+          const g = state.real.thirds[src.slot];
+          return g ? getRealGroupTeam(g, 3) : null;
+        }
         return null;
       }
       // Conjunto de selecciones que (según los resultados reales) alcanzaron
