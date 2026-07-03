@@ -1626,32 +1626,18 @@
         <h1 class="logo">⚽ Mundial 2026 - La mierda</h1>
         <div class="subtitle">Porra — El ganador se lleva una cena gratis</div>
 
-        <div
-          id="groupSelectorBar"
-          style="
-            margin-top: 10px;
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-          "
-        >
-          <span style="font-size: 12px; color: var(--muted)">Grupo:</span>
-          <select
-            id="headerGroupSelect"
-            onchange="changeGroupFromHeader()"
-            style="
-              background: var(--surface);
-              border: 1px solid var(--border);
-              border-radius: 6px;
-              color: var(--accent);
-              padding: 5px 10px;
-              font-size: 12px;
-              cursor: pointer;
-              outline: none;
-            "
-          >
+        <div id="groupSelectorBar" style="margin-top: 10px; display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap;">
+          <span style="font-size: 12px; color: var(--muted);">Grupo:</span>
+          <select id="headerGroupSelect" onchange="changeGroupFromHeader()" style="
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--accent);
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            outline: none;
+          ">
             <option value="">Cargando...</option>
           </select>
         </div>
@@ -1729,34 +1715,15 @@
       <!-- MIS GRUPOS -->
       <div class="section" id="sec-my-groups">
         <div class="instruction">
-          <strong>🎭 Tus Grupos</strong> — Aquí puedes crear nuevos grupos,
-          unirte a los de tus amigos, o ver los códigos para invitar.
+          <strong>🎭 Tus Grupos</strong> — Aquí puedes crear nuevos grupos, unirte a los de tus amigos, o ver los códigos para invitar.
         </div>
 
-        <div id="groupsContainer" style="margin-top: 16px">
-          <div style="display: flex; gap: 8px; margin-bottom: 14px">
-            <button
-              class="phase-btn"
-              style="
-                flex: 1;
-                background: var(--accent);
-                color: #fff;
-                border-color: var(--accent);
-              "
-              onclick="showCreateGroupDialog()"
-            >
+        <div id="groupsContainer" style="margin-top: 16px;">
+          <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+            <button class="phase-btn" style="flex: 1; background: var(--accent); color: #fff; border-color: var(--accent);" onclick="showCreateGroupDialog()">
               ➕ Crear Grupo
             </button>
-            <button
-              class="phase-btn"
-              style="
-                flex: 1;
-                background: transparent;
-                border-color: var(--accent);
-                color: var(--accent);
-              "
-              onclick="showJoinGroupDialog()"
-            >
+            <button class="phase-btn" style="flex: 1; background: transparent; border-color: var(--accent); color: var(--accent);" onclick="showJoinGroupDialog()">
               🔗 Unirse
             </button>
           </div>
@@ -2129,12 +2096,10 @@
             // Actualizar selector del header
             const headerSelect = document.getElementById("headerGroupSelect");
             if (headerSelect) {
-              headerSelect.innerHTML = userGroups
-                .map((ug) => {
-                  const g = ug.grupos;
-                  return `<option value="${g.id}" ${currentGroupId === g.id ? "selected" : ""}>${g.name}</option>`;
-                })
-                .join("");
+              headerSelect.innerHTML = userGroups.map(ug => {
+                const g = ug.grupos;
+                return `<option value="${g.id}" ${currentGroupId === g.id ? 'selected' : ''}>${g.name}</option>`;
+              }).join("");
             }
 
             await renderGroupsList();
@@ -2169,17 +2134,14 @@
         if (!currentUser || !groupName) return;
         try {
           showLoading("Creando grupo...");
-          const inviteCode = Math.random()
-            .toString(36)
-            .substring(2, 8)
-            .toUpperCase();
+          const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
           const { data, error } = await sb
             .from("grupos")
             .insert({
               name: groupName,
               created_by: currentUser.id,
-              invite_code: inviteCode,
+              invite_code: inviteCode
             })
             .select();
 
@@ -2188,7 +2150,7 @@
           const newGroupId = data[0].id;
           await sb.from("users_grupos").insert({
             user_id: currentUser.id,
-            group_id: newGroupId,
+            group_id: newGroupId
           });
 
           hideLoading();
@@ -2196,15 +2158,11 @@
           currentGroupId = newGroupId;
           await loadPrediction();
           await loadRanking();
-          showNotification(
-            "✓ Grupo creado",
-            `Código: ${inviteCode}\n\nComparte con tus amigos`,
-            "success",
-          );
+          showNotification('✓ Grupo creado', `Código: ${inviteCode}\n\nComparte con tus amigos`, 'success');
         } catch (err) {
           hideLoading();
           console.error("Error creando grupo:", err);
-          showNotification("❌ Error", "No se pudo crear el grupo", "error");
+          showNotification('❌ Error', 'No se pudo crear el grupo', 'error');
         }
       }
 
@@ -2221,18 +2179,16 @@
 
           if (groupError || !groupData) {
             hideLoading();
-            showNotification(
-              "❌ Código inválido",
-              "El código no existe o el grupo fue eliminado",
-              "error",
-            );
+            showNotification('❌ Código inválido', 'El código no existe o el grupo fue eliminado', 'error');
             return;
           }
 
-          const { error: joinError } = await sb.from("users_grupos").insert({
-            user_id: currentUser.id,
-            group_id: groupData.id,
-          });
+          const { error: joinError } = await sb
+            .from("users_grupos")
+            .insert({
+              user_id: currentUser.id,
+              group_id: groupData.id
+            });
 
           if (joinError && !joinError.message.includes("duplicate")) {
             throw joinError;
@@ -2243,15 +2199,11 @@
           currentGroupId = groupData.id;
           await loadPrediction();
           await loadRanking();
-          showNotification(
-            `✓ ¡Te uniste!`,
-            `Ahora eres parte de "${groupData.name}"`,
-            "success",
-          );
+          showNotification(`✓ ¡Te uniste!`, `Ahora eres parte de "${groupData.name}"`, 'success');
         } catch (err) {
           hideLoading();
           console.error("Error uniéndose al grupo:", err);
-          showNotification("❌ Error", "No se pudo unirse al grupo", "error");
+          showNotification('❌ Error', 'No se pudo unirse al grupo', 'error');
         }
       }
 
@@ -2260,41 +2212,32 @@
         const headerSelect = document.getElementById("headerGroupSelect");
 
         if (!userGroups || userGroups.length === 0) {
-          container.innerHTML =
-            '<div class="info-box">No tienes grupos aún. Crea uno o únete con un código.</div>';
+          container.innerHTML = '<div class="info-box">No tienes grupos aún. Crea uno o únete con un código.</div>';
           headerSelect.innerHTML = '<option value="">Sin grupos</option>';
           return;
         }
 
         // Actualizar selector del header
-        headerSelect.innerHTML = userGroups
-          .map((ug) => {
-            const g = ug.grupos;
-            return `<option value="${g.id}" ${currentGroupId === g.id ? "selected" : ""}>${g.name}</option>`;
-          })
-          .join("");
+        headerSelect.innerHTML = userGroups.map(ug => {
+          const g = ug.grupos;
+          return `<option value="${g.id}" ${currentGroupId === g.id ? 'selected' : ''}>${g.name}</option>`;
+        }).join("");
 
         // Renderizar lista de grupos
-        container.innerHTML = userGroups
-          .map((ug) => {
-            const g = ug.grupos;
-            const isCreator = g.created_by === currentUser.id;
-            return `
+        container.innerHTML = userGroups.map(ug => {
+          const g = ug.grupos;
+          const isCreator = g.created_by === currentUser.id;
+          return `
             <div class="group-card">
-              <div class="group-card-title">👥 ${g.name}${isCreator ? ' <span style="font-size:10px;color:var(--accent)">👑</span>' : ""}</div>
+              <div class="group-card-title">👥 ${g.name}${isCreator ? ' <span style="font-size:10px;color:var(--accent)">👑</span>' : ''}</div>
               <div class="group-card-actions">
-                ${
-                  isCreator
-                    ? `<button class="group-card-btn" onclick="shareGroupCode('${g.name}', '${g.invite_code}')">
+                ${isCreator ? `<button class="group-card-btn" onclick="shareGroupCode('${g.name}', '${g.invite_code}')">
                   🔗 Compartir código
-                </button>`
-                    : '<div style="font-size:11px;color:var(--muted);padding:8px;">Creado por otros</div>'
-                }
+                </button>` : '<div style="font-size:11px;color:var(--muted);padding:8px;">Creado por otros</div>'}
               </div>
             </div>
           `;
-          })
-          .join("");
+        }).join("");
       }
 
       function changeGroupFromHeader() {
@@ -2305,8 +2248,8 @@
         }
       }
 
-      function showNotification(title, message, type = "info") {
-        const notification = document.createElement("div");
+      function showNotification(title, message, type = 'info') {
+        const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.innerHTML = `
           <div class="notification-title">${title}</div>
@@ -2315,17 +2258,13 @@
         document.body.appendChild(notification);
 
         setTimeout(() => {
-          notification.style.animation = "slideOut 0.3s ease-out";
+          notification.style.animation = 'slideOut 0.3s ease-out';
           setTimeout(() => notification.remove(), 300);
         }, 4000);
       }
 
       function shareGroupCode(groupName, code) {
-        showNotification(
-          `📋 ${groupName}`,
-          `Código: ${code}\n\nComparte con tus amigos`,
-          "info",
-        );
+        showNotification(`📋 ${groupName}`, `Código: ${code}\n\nComparte con tus amigos`, 'info');
         navigator.clipboard.writeText(code);
       }
 
@@ -2448,8 +2387,8 @@
             sb
               .from("predictions")
               .select("data,username")
-              .eq("user_id", currentUser.id)
-              .eq("group_id", currentGroupId)
+              .eq('user_id', currentUser.id)
+              .eq('group_id', currentGroupId)
               .maybeSingle(),
             timeout(30000),
           ]);
@@ -2498,25 +2437,21 @@
         saveTimer = setTimeout(() => pushSave(), 1500);
       }
 
-      async function pushSave() {
-        if (!currentUser || !currentGroupId) return;
-        const name =
-          currentUser.user_metadata?.username ||
-          currentUser.email.split("@")[0];
-        const payload = {
-          data: state,
-          username: name,
-          user_id: currentUser.id,
-          group_id: currentGroupId,
-          updated_at: new Date().toISOString(),
-        };
-        await sb
-          .from("predictions")
-          .upsert(payload, { onConflict: "user_id,group_id" });
-        const st = document.getElementById("saveStatus");
-        st.classList.add("show");
-        setTimeout(() => st.classList.remove("show"), 2000);
-      }
+     async function pushSave() {
+  if (!currentUser || !currentGroupId) return;
+  const name = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
+  const payload = {
+    data: state,
+    username: name,
+    user_id: currentUser.id,
+    group_id: currentGroupId,
+    updated_at: new Date().toISOString(),
+  };
+  await sb.from('predictions').upsert(payload, { onConflict: 'user_id,group_id' });
+  const st = document.getElementById('saveStatus');
+  st.classList.add('show');
+  setTimeout(() => st.classList.remove('show'), 2000);
+}
 
       async function saveRealResults() {
         if (currentUser.email !== ADMIN_EMAIL) return;
@@ -2836,26 +2771,24 @@
 
       /* ── BRACKET ── */
       const R32 = [
-        // ─── MITAD IZQUIERDA ───
-        [{ winner: "E" }, { third: "D" }], // 1. 1ºE vs 3ºD
-        [{ winner: "I" }, { third: "F" }], // 2. 1ºI vs 3ºF
-        [{ runner: "A" }, { runner: "B" }], // 3. 2ºA vs 2ºB
-        [{ winner: "F" }, { runner: "C" }], // 4. 1ºF vs 2ºC
-        [{ runner: "K" }, { runner: "L" }], // 5. 2ºK vs 2ºL
-        [{ winner: "H" }, { runner: "J" }], // 6. 1ºH vs 2ºJ
-        [{ winner: "D" }, { third: "B" }], // 7. 1ºD vs 3ºB
-        [{ winner: "G" }, { third: "I" }], // 8. 1ºG vs 3ºI
-
-        // ─── MITAD DERECHA ───
-        [{ winner: "C" }, { runner: "F" }], // 9. 1ºC vs 2ºF
-        [{ runner: "E" }, { runner: "I" }], // 10. 2ºE vs 2ºI
-        [{ winner: "A" }, { third: "E" }], // 11. 1ºA vs 3ºE
-        [{ winner: "L" }, { third: "K" }], // 12. 1ºL vs 3ºK
-        [{ winner: "J" }, { runner: "H" }], // 13. 1ºJ vs 2ºH
-        [{ runner: "D" }, { runner: "G" }], // 14. 2ºD vs 2ºG
-        [{ winner: "B" }, { third: "J" }], // 15. 1ºB vs 3ºJ
-        [{ winner: "K" }, { third: "L" }], // 16. 1ºK vs 3ºL
-      ];
+  [ { type: "runner", group: "A" }, { type: "runner", group: "B" } ],
+  [ { type: "winner", group: "E" }, { type: "third", slot: 0 } ],
+  [ { type: "winner", group: "F" }, { type: "runner", group: "C" } ],
+  [ { type: "winner", group: "H" }, { type: "runner", group: "J" } ], // 1H vs 2J
+  [ { type: "winner", group: "I" }, { type: "third", slot: 1 } ],     // 1I (Francia)
+  [ { type: "runner", group: "E" }, { type: "runner", group: "I" } ],
+  [ { type: "winner", group: "A" }, { type: "third", slot: 2 } ],
+  [ { type: "winner", group: "L" }, { type: "third", slot: 3 } ],
+  // --- MITAD ---
+  [ { type: "winner", group: "D" }, { type: "third", slot: 4 } ],
+  [ { type: "winner", group: "G" }, { type: "third", slot: 5 } ],
+  [ { type: "runner", group: "K" }, { type: "runner", group: "L" } ],
+  [ { type: "winner", group: "C" }, { type: "runner", group: "F" } ], // 1C vs 2F
+  [ { type: "winner", group: "B" }, { type: "third", slot: 6 } ],
+  [ { type: "winner", group: "J" }, { type: "runner", group: "H" } ],
+  [ { type: "winner", group: "K" }, { type: "third", slot: 7 } ],
+  [ { type: "runner", group: "D" }, { type: "runner", group: "G" } ],
+];
       const R16_PAIRS = [
         [0, 1],
         [2, 3],
@@ -2876,34 +2809,18 @@
         [0, 1],
         [2, 3],
       ];
-      function getRealTeam(group, type) {
-        // Si tu función getTeam lee del objeto 'state',
-        // esta simplemente lee del objeto 'state.real'
-        const realData = state.real;
 
-        // Aquí usamos la misma lógica que tu función getTeam oficial
-        // (Asegúrate de que 'realData' contenga los mismos campos que tu 'state' principal)
-        if (realData && realData.groups && realData.groups[group]) {
-          return realData.groups[group][type - 1]; // Ajusta el índice si tu getTeam lo requiere
+      function resolveTeam(src) {
+        if (!src) return null;
+        if (src.type === "winner") return getTeam(src.group, 1);
+        if (src.type === "runner") return getTeam(src.group, 2);
+        if (src.type === "third") {
+          const g = state.thirds[src.slot];
+          return g ? getTeam(g, 3) : null;
         }
-        return null;
-      }
-
-      function resolveTeam(match) {
-        // match es por ejemplo { winner: "E" } o { third: "D" }
-        if (match.winner) return getTeam(match.winner, 1);
-        if (match.runner) return getTeam(match.runner, 2);
-
-        if (match.third) {
-          const group = match.third;
-          // Buscamos si el usuario eligió el 3º de este grupo concreto
-          const userChoice = state.thirds.find((item) => item.group === group);
-
-          // Si eligió, devolvemos su elección. Si no, devolvemos el equipo REAL
-          // para que la porra no se rompa y el cuadro esté completo.
-          return userChoice
-            ? getTeam(userChoice.team, 3)
-            : getRealTeam(group, 3);
+        if (src.type === "mw") {
+          const arr = state[src.stage];
+          return arr && arr[src.idx] ? arr[src.idx] : null;
         }
         return null;
       }
@@ -2928,22 +2845,10 @@
       }
       function resolveRealTeam(src) {
         if (!src) return null;
-
-        // Para el admin, simplemente devolvemos lo que hay en el estado oficial
         if (src.type === "winner") return getRealGroupTeam(src.group, 1);
         if (src.type === "runner") return getRealGroupTeam(src.group, 2);
-
-        // Aquí devolvemos el 3º clasificado REAL del grupo especificado
-        if (src.type === "third") {
-          return getRealGroupTeam(src.group, 3);
-        }
-
-        // Si es un partido ya jugado (mw = match winner)
-        if (src.type === "mw") {
-          const arr = state.real[src.stage]; // Asumiendo que guardas los resultados reales en state.real
-          return arr && arr[src.idx] ? arr[src.idx] : null;
-        }
-
+        // Los "mejores terceros" reales no tienen asignación de slot hasta que
+        // el admin marque clasificados, así que quedan por definir.
         return null;
       }
       // Conjunto de selecciones que (según los resultados reales) alcanzaron
@@ -2967,14 +2872,12 @@
           const pair = R32[idx];
           let t1 = resolveRealTeam(pair[0]);
           let t2 = resolveRealTeam(pair[1]);
-
+          
           // Magia: Si falta el 3º (Por definir), lo buscamos en los partidos reales de la API
           if ((!t1 || !t2) && state.real?.matches) {
             const known = t1 || t2;
             if (known) {
-              const m = state.real.matches.find(
-                (x) => x.home === known.n || x.away === known.n,
-              );
+              const m = state.real.matches.find(x => x.home === known.n || x.away === known.n);
               if (m) {
                 const other = m.home === known.n ? m.away : m.home;
                 if (!t1) t1 = teamByName(other);
@@ -2984,20 +2887,8 @@
           }
           return [t1, t2];
         }
-        const prev =
-          stage === "r16"
-            ? "r32"
-            : stage === "qf"
-              ? "r16"
-              : stage === "sf"
-                ? "qf"
-                : "sf";
-        const pairsMap = {
-          r16: R16_PAIRS,
-          qf: QF_PAIRS,
-          sf: SF_PAIRS,
-          final: [[0, 1]],
-        };
+        const prev = stage === "r16" ? "r32" : stage === "qf" ? "r16" : stage === "sf" ? "qf" : "sf";
+        const pairsMap = { r16: R16_PAIRS, qf: QF_PAIRS, sf: SF_PAIRS, final: [[0, 1]] };
         const pair = pairsMap[stage][idx];
         return [realMatchWinner(prev, pair[0]), realMatchWinner(prev, pair[1])];
       }
@@ -3024,153 +2915,9 @@
         return winners.length === 1 ? winners[0] : null;
       }
 
-      /* ── VALIDACIÓN DE IMPOSSIBILITIES ──
-         Sistema para detectar y permitir edición SOLO de lo imposible */
-
-      function getR32Half(team) {
-        // Retorna 'A' (superior) o 'B' (inferior) según dónde está el equipo en R32
-        // Índices 0-7: Mitad A (superior)
-        // Índices 8-15: Mitad B (inferior)
-        for (let i = 0; i < R32.length; i++) {
-          const pair = R32[i];
-          const t1 = resolveTeam(pair[0]);
-          const t2 = resolveTeam(pair[1]);
-          if ((t1 && t1.n === team.n) || (t2 && t2.n === team.n)) {
-            return i < 8 ? "A" : "B";
-          }
-        }
-        return null;
-      }
-
-      function canTeamsMeetAt(team1, team2, stage) {
-        // Verifica si dos equipos PUEDEN enfrentarse en una ronda según el bracket real
-        if (!team1 || !team2) return true; // Si falta alguno, permitir (todavía no definido)
-        if (team1.n === team2.n) return false; // No pueden enfrentarse contra sí mismos
-
-        // FINAL: Deben estar en mitades DIFERENTES del R32
-        if (stage === "final") {
-          const half1 = getR32Half(team1);
-          const half2 = getR32Half(team2);
-          // Ambos deben tener mitad asignada y ser diferentes
-          if (half1 && half2) {
-            // Si están en la misma mitad, no pueden enfrentarse en final
-            if (half1 === half2) return false;
-            return true; // Mitades diferentes = OK
-          }
-          // Si no sabemos la mitad, permitir por ahora
-          return true;
-        }
-
-        // SEMIFINAL: Permitir (validaremos en final)
-        if (stage === "sf") {
-          return true;
-        }
-
-        return true; // Otras rondas no tienen restricciones
-      }
-
-      function detectImpossibilities() {
-        // Retorna objeto indicando qué campos están imposibles
-        const impossible = { sf: false, final: false };
-
-        const sf = (state.sf || []).filter(Boolean);
-        const final_t = state.final ? state.final[0] : null;
-
-        if (sf.length === 2) {
-          const [t1, t2] = sf;
-          if (!canTeamsMeetAt(t1, t2, "sf")) {
-            impossible.sf = true;
-          }
-        }
-
-        if (sf.length === 2 && final_t) {
-          // Los 2 semifinalistas, uno debe ser el final
-          // Verifica que el finalista sea uno de los semifinalistas
-          if (!sf.some((t) => t.n === final_t.n)) {
-            impossible.final = true;
-          } else if (!canTeamsMeetAt(sf[0], sf[1], "final")) {
-            impossible.sf = true;
-            impossible.final = true;
-          }
-        }
-
-        return impossible;
-      }
-
-      function hasLegacyKnockoutData() {
-        const hasR32Data = (state.r32 || []).some(
-          (x) => x !== null && x !== undefined,
-        );
-        const hasR16Data = (state.r16 || []).some(
-          (x) => x !== null && x !== undefined,
-        );
-        const hasQFData = (state.qf || []).some(
-          (x) => x !== null && x !== undefined,
-        );
-        const hasSFData = (state.sf || []).some(
-          (x) => x !== null && x !== undefined,
-        );
-        const hasFinalData = !!(state.final && state.final[0]);
-        return (
-          hasR32Data || hasR16Data || hasQFData || hasSFData || hasFinalData
-        );
-      }
-
-      function hasLegacyInconsistencies() {
-        if (!hasLegacyKnockoutData()) return false;
-        const impossible = detectImpossibilities();
-        return impossible.sf || impossible.final;
-      }
-
-      function isFieldEditable(stage) {
-        // En eliminatorias dejamos editar para poder corregir porras antiguas
-        // después del arreglo de cruces. El control de imposibles se mantiene
-        // al elegir ganador (canTeamsMeetAt).
-        if (["r32", "r16", "qf", "sf", "final"].includes(stage)) return true;
-        return true;
-      }
-
-      function pickWinner(stage, idx, team) {
-        // Validar que el equipo sea compatible
-        const pair = {
-          r16: R16_PAIRS,
-          qf: QF_PAIRS,
-          sf: SF_PAIRS,
-          final: [[0, 1]],
-        }[stage];
-        if (pair && pair[idx]) {
-          const otherIdx = idx === 0 ? 1 : 0;
-          const other = getW(stage, otherIdx);
-          if (other && !canTeamsMeetAt(team, other, stage)) {
-            const half1 = getR32Half(team);
-            const half2 = getR32Half(other);
-            alert(
-              `⚠️ ${team.n} (Mitad ${half1}) no puede enfrentarse a ${other.n} (Mitad ${half2}).\n\nAmbos están en la MISMA MITAD del bracket.`,
-            );
-            return;
-          }
-        }
-
-        if (!state[stage]) state[stage] = [];
-        state[stage][idx] = team;
-        saveState();
-        rebuildBracket(stage);
-        updateProgress();
-        if (stage === "final" && team) {
-          document.getElementById("championBox").style.display = "block";
-          document.getElementById("championName").textContent =
-            team.f + " " + team.n;
-        }
-      }
-
       function buildBracket(containerId, matches, stageKey, title) {
         const c = document.getElementById(containerId);
-        const needsReview = hasLegacyInconsistencies();
-        const reviewMsg = needsReview
-          ? '<div style="font-size:11px;color:#f7631b;margin-bottom:8px;font-weight:600;">⚠️ Esta porra tenía cruces heredados: revisa y corrige si hace falta</div>'
-          : '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;">Selecciona el ganador de cada cruce</div>';
-
-        c.innerHTML = `<div class="round-title">${title}</div>${reviewMsg}`;
+        c.innerHTML = `<div class="round-title">${title}</div>`;
         matches.forEach((m, i) => {
           const t1 = resolveTeam(m[0]),
             t2 = resolveTeam(m[1]),
@@ -3190,7 +2937,6 @@
                 : winner && t
                   ? " loser"
                   : "");
-
             if (t) {
               row.innerHTML = `<span class="mflag">${t.f}</span><span class="mname">${t.n}</span>${winner && winner.n === t.n ? '<span class="win-icon">✓</span>' : ""}`;
               row.onclick = () => pickWinner(stageKey, i, t);
@@ -3202,6 +2948,18 @@
           c.appendChild(card);
         });
         updateProgress();
+      }
+      function pickWinner(stage, idx, team) {
+        if (!state[stage]) state[stage] = [];
+        state[stage][idx] = team;
+        saveState();
+        rebuildBracket(stage);
+        updateProgress();
+        if (stage === "final" && team) {
+          document.getElementById("championBox").style.display = "block";
+          document.getElementById("championName").textContent =
+            team.f + " " + team.n;
+        }
       }
       function rebuildBracket(stage) {
         if (stage === "r32") buildR32();
@@ -4418,8 +4176,7 @@
           const rr = real.groups?.[g] || {};
           const my = s.groups?.[g] || {};
           ["p1", "p2", "p3"].forEach((k) => {
-            if (my[k] != null && rr[k] != null && my[k] === rr[k])
-              total += PTS.groups;
+            if (my[k] != null && rr[k] != null && my[k] === rr[k]) total += PTS.groups;
           });
         });
 
@@ -4428,16 +4185,11 @@
           r32: getMyR32Teams(s),
           r16: s.r32 || [],
           qf: s.r16 || [],
-          sf: s.qf || [],
+          sf: s.qf || []
         };
 
         // Rondas
-        [
-          ["r32", PTS.r32],
-          ["r16", PTS.r16],
-          ["qf", PTS.qf],
-          ["sf", PTS.sf],
-        ].forEach(([stage, pts]) => {
+        [["r32", PTS.r32], ["r16", PTS.r16], ["qf", PTS.qf], ["sf", PTS.sf]].forEach(([stage, pts]) => {
           const realList = (real[stage] || []).filter((x) => x);
           const myList = myPreds[stage].filter((x) => x);
           myList.forEach((t) => {
@@ -4449,43 +4201,23 @@
         const mySF = Array.isArray(s.sf) ? s.sf.filter(Boolean) : []; // Finalistas
         const myQF = Array.isArray(s.qf) ? s.qf.filter(Boolean) : []; // Los 4 que jugaron las semis
         const myFinal = Array.isArray(s.final) ? s.final.filter(Boolean) : []; // Campeón
-
+        
         // Los perdedores de semis son los de Cuartos que NO llegaron a la final (ganadores semis)
-        const mySFLosers = myQF.filter(
-          (t) => t && !mySF.some((win) => win && win.n === t.n),
-        );
+        const mySFLosers = myQF.filter(t => t && !mySF.some(win => win && win.n === t.n));
 
-        const rP3 = real.p3
-          ? teamByName(typeof real.p3 === "string" ? real.p3 : real.p3.n)
-          : null;
-        const rP4 = real.p4
-          ? teamByName(typeof real.p4 === "string" ? real.p4 : real.p4.n)
-          : null;
-        const rRunner = real.runner
-          ? teamByName(
-              typeof real.runner === "string" ? real.runner : real.runner.n,
-            )
-          : null;
-        const rChamp = real.champion
-          ? teamByName(
-              typeof real.champion === "string"
-                ? real.champion
-                : real.champion.n,
-            )
-          : null;
-
+        const rP3 = real.p3 ? teamByName(typeof real.p3 === "string" ? real.p3 : real.p3.n) : null;
+        const rP4 = real.p4 ? teamByName(typeof real.p4 === "string" ? real.p4 : real.p4.n) : null;
+        const rRunner = real.runner ? teamByName(typeof real.runner === "string" ? real.runner : real.runner.n) : null;
+        const rChamp = real.champion ? teamByName(typeof real.champion === "string" ? real.champion : real.champion.n) : null;
+        
         if (rP3 && mySFLosers.some((t) => t.n === rP3.n)) total += PTS.p3;
         if (rP4 && mySFLosers.some((t) => t.n === rP4.n)) total += PTS.p4;
-
+        
         // Finalistas
-        const myFinalLoser = myFinal[0]
-          ? mySF.find((t) => t && t.n !== myFinal[0].n)
-          : null;
-        if (rRunner && myFinalLoser && myFinalLoser.n === rRunner.n)
-          total += PTS.runner;
-        if (rChamp && myFinal[0] && myFinal[0].n === rChamp.n)
-          total += PTS.champion;
-
+        const myFinalLoser = myFinal[0] ? mySF.find((t) => t && t.n !== myFinal[0].n) : null;
+        if (rRunner && myFinalLoser && myFinalLoser.n === rRunner.n) total += PTS.runner;
+        if (rChamp && myFinal[0] && myFinal[0].n === rChamp.n) total += PTS.champion;
+        
         return total;
       }
       function calcScore() {
@@ -4494,155 +4226,144 @@
 
       /* ── ESTADÍSTICAS PERSONALES ── */
       function buildStats() {
-        const container = document.getElementById("stats-container");
-        if (!container) return;
+  const container = document.getElementById("stats-container");
+  if (!container) return;
 
-        const sc = calcScoreDetailed();
-        const r = state.real;
+  const sc = calcScoreDetailed();
+  const r = state.real;
 
-        if (
-          !r ||
-          (Object.keys(r.groups || {}).length === 0 &&
-            (r.r32 || []).length === 0 &&
-            (r.r16 || []).length === 0 &&
-            (r.qf || []).length === 0 &&
-            (r.sf || []).length === 0 &&
-            !r.champion)
-        ) {
-          container.innerHTML =
-            '<div class="info-box">El administrador aún no ha introducido resultados.</div>';
-          return;
-        }
+  if (!r || (
+    Object.keys(r.groups || {}).length === 0 &&
+    (r.r32 || []).length === 0 &&
+    (r.r16 || []).length === 0 &&
+    (r.qf || []).length === 0 &&
+    (r.sf || []).length === 0 &&
+    !r.champion
+  )) {
+    container.innerHTML = '<div class="info-box">El administrador aún no ha introducido resultados.</div>';
+    return;
+  }
 
-        let html = '<div style="display:grid;gap:12px;">';
+  let html = '<div style="display:grid;gap:12px;">';
 
-        // ── GRUPOS: detalle de qué posiciones acertaste en cada grupo ──
-        const groupsWithData = Object.keys(GROUPS).filter((g) => {
-          const rr = r.groups?.[g] || {};
-          return rr.p1 != null || rr.p2 != null || rr.p3 != null;
-        });
+  // ── GRUPOS: detalle de qué posiciones acertaste en cada grupo ──
+  const groupsWithData = Object.keys(GROUPS).filter(g => {
+    const rr = r.groups?.[g] || {};
+    return rr.p1 != null || rr.p2 != null || rr.p3 != null;
+  });
 
-        if (groupsWithData.length > 0) {
-          let groupRows = "";
-          groupsWithData.forEach((g) => {
-            const rr = r.groups?.[g] || {};
-            const my = state.groups[g] || {};
-            const rowsForGroup = [1, 2, 3]
-              .map((pos) => {
-                const key = "p" + pos;
-                const realIdx = rr[key];
-                const myIdx = my[key];
-                if (realIdx == null) return "";
-                const realTeam = GROUPS[g].teams[realIdx];
-                const hit = myIdx != null && myIdx === realIdx;
-                const myTeam = myIdx != null ? GROUPS[g].teams[myIdx] : null;
-                return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:12px;">
+  if (groupsWithData.length > 0) {
+    let groupRows = "";
+    groupsWithData.forEach(g => {
+      const rr = r.groups?.[g] || {};
+      const my = state.groups[g] || {};
+      const rowsForGroup = [1, 2, 3].map(pos => {
+        const key = "p" + pos;
+        const realIdx = rr[key];
+        const myIdx = my[key];
+        if (realIdx == null) return "";
+        const realTeam = GROUPS[g].teams[realIdx];
+        const hit = myIdx != null && myIdx === realIdx;
+        const myTeam = myIdx != null ? GROUPS[g].teams[myIdx] : null;
+        return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:12px;">
           <span style="width:14px;color:var(--muted);">${pos}°</span>
-          <span style="flex:1;color:${hit ? "var(--green)" : "var(--text)"};font-weight:${hit ? "700" : "400"};">
+          <span style="flex:1;color:${hit ? 'var(--green)' : 'var(--text)'};font-weight:${hit ? '700' : '400'};">
             ${realTeam.f} ${realTeam.n}
           </span>
-          ${
-            hit
-              ? '<span style="font-size:10px;color:var(--green);font-weight:700;">✓ ACIERTO</span>'
-              : myTeam
-                ? `<span style="font-size:10px;color:var(--muted);">tú: ${myTeam.f} ${myTeam.n}</span>`
-                : '<span style="font-size:10px;color:var(--muted);">sin predicción</span>'
-          }
+          ${hit
+            ? '<span style="font-size:10px;color:var(--green);font-weight:700;">✓ ACIERTO</span>'
+            : myTeam
+              ? `<span style="font-size:10px;color:var(--muted);">tú: ${myTeam.f} ${myTeam.n}</span>`
+              : '<span style="font-size:10px;color:var(--muted);">sin predicción</span>'}
         </div>`;
-              })
-              .join("");
-            groupRows += `<div style="margin-bottom:8px;">
+      }).join("");
+      groupRows += `<div style="margin-bottom:8px;">
         <div style="font-size:11px;color:var(--accent);font-weight:700;margin-bottom:2px;">GRUPO ${g}</div>
         ${rowsForGroup}
       </div>`;
-          });
+    });
 
-          html += `
+    html += `
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <span style="font-weight:600;color:var(--text);">📊 Grupos</span>
-          <span style="font-size:14px;color:${sc.breakdown.groups?.pts > 0 ? "var(--accent2)" : "var(--muted)"};">+${sc.breakdown.groups?.pts || 0} pts</span>
+          <span style="font-size:14px;color:${sc.breakdown.groups?.pts > 0 ? 'var(--accent2)' : 'var(--muted)'};">+${sc.breakdown.groups?.pts || 0} pts</span>
         </div>
         ${groupRows}
       </div>`;
-        }
+  }
 
-        // ── RONDAS ELIMINATORIAS: detalle de equipos acertados ──
-        const roundDefs = [
-          { key: "r32", label: "⚡ Dieciseisavos" },
-          { key: "r16", label: "🔥 Octavos" },
-          { key: "qf", label: "🏟️ Cuartos" },
-          { key: "sf", label: "🌟 Semis" },
-        ];
+  // ── RONDAS ELIMINATORIAS: detalle de equipos acertados ──
+  const roundDefs = [
+    { key: 'r32', label: '⚡ Dieciseisavos' },
+    { key: 'r16', label: '🔥 Octavos' },
+    { key: 'qf', label: '🏟️ Cuartos' },
+    { key: 'sf', label: '🌟 Semis' },
+  ];
 
-        roundDefs.forEach(({ key, label }) => {
-          const realList = (r[key] || []).filter((x) => x);
-          if (realList.length === 0) return;
-          const myList = (state[key] || []).filter((x) => x);
+  roundDefs.forEach(({ key, label }) => {
+    const realList = (r[key] || []).filter(x => x);
+    if (realList.length === 0) return;
+    const myList = (state[key] || []).filter(x => x);
 
-          const teamRows = realList
-            .map((t) => {
-              const hit = myList.some((mt) => mt.n === t.n);
-              return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:12px;">
+    const teamRows = realList.map(t => {
+      const hit = myList.some(mt => mt.n === t.n);
+      return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:12px;">
         <span style="font-size:15px;">${t.f}</span>
-        <span style="flex:1;color:${hit ? "var(--green)" : "var(--text)"};font-weight:${hit ? "700" : "400"};">${t.n}</span>
-        ${
-          hit
-            ? '<span style="font-size:10px;color:var(--green);font-weight:700;">✓ ACIERTO</span>'
-            : '<span style="font-size:10px;color:var(--muted);">no la pusiste</span>'
-        }
+        <span style="flex:1;color:${hit ? 'var(--green)' : 'var(--text)'};font-weight:${hit ? '700' : '400'};">${t.n}</span>
+        ${hit
+          ? '<span style="font-size:10px;color:var(--green);font-weight:700;">✓ ACIERTO</span>'
+          : '<span style="font-size:10px;color:var(--muted);">no la pusiste</span>'}
       </div>`;
-            })
-            .join("");
+    }).join("");
 
-          html += `
+    html += `
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <span style="font-weight:600;color:var(--text);">${label}</span>
-          <span style="font-size:14px;color:${sc.breakdown[key]?.pts > 0 ? "var(--accent2)" : "var(--muted)"};">+${sc.breakdown[key]?.pts || 0} pts</span>
+          <span style="font-size:14px;color:${sc.breakdown[key]?.pts > 0 ? 'var(--accent2)' : 'var(--muted)'};">+${sc.breakdown[key]?.pts || 0} pts</span>
         </div>
         ${teamRows}
       </div>`;
-        });
+  });
 
-        // ── POSICIONES FINALES ──
-        const specials = [
-          { key: "p4", label: "4º Puesto", real: r.p4 },
-          { key: "p3", label: "🥉 3er Puesto", real: r.p3 },
-          { key: "runner", label: "🥈 Subcampeón", real: r.runner },
-          { key: "champion", label: "🏆 Campeón", real: r.champion },
-        ].filter((s) => s.real);
+  // ── POSICIONES FINALES ──
+  const specials = [
+    { key: 'p4', label: '4º Puesto', real: r.p4 },
+    { key: 'p3', label: '🥉 3er Puesto', real: r.p3 },
+    { key: 'runner', label: '🥈 Subcampeón', real: r.runner },
+    { key: 'champion', label: '🏆 Campeón', real: r.champion },
+  ].filter(s => s.real);
 
-        if (specials.length > 0) {
-          let specialRows = "";
-          specials.forEach((s) => {
-            const realTeam =
-              typeof s.real === "string" ? teamByName(s.real) : s.real;
-            const pts = sc.breakdown[s.key]?.pts || 0;
-            const hit = pts > 0;
-            specialRows += `<div style="display:flex;align-items:center;gap:6px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);">
+  if (specials.length > 0) {
+    let specialRows = "";
+    specials.forEach(s => {
+      const realTeam = typeof s.real === 'string' ? teamByName(s.real) : s.real;
+      const pts = sc.breakdown[s.key]?.pts || 0;
+      const hit = pts > 0;
+      specialRows += `<div style="display:flex;align-items:center;gap:6px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);">
         <span style="width:90px;color:var(--muted);font-size:11px;">${s.label}</span>
-        <span style="font-size:16px;">${realTeam?.f || ""}</span>
-        <span style="flex:1;color:${hit ? "var(--green)" : "var(--text)"};font-weight:${hit ? "700" : "400"};">${realTeam?.n || "?"}</span>
+        <span style="font-size:16px;">${realTeam?.f || ''}</span>
+        <span style="flex:1;color:${hit ? 'var(--green)' : 'var(--text)'};font-weight:${hit ? '700' : '400'};">${realTeam?.n || '?'}</span>
         ${hit ? `<span style="font-size:10px;color:var(--green);font-weight:700;">✓ +${pts}</span>` : '<span style="font-size:10px;color:var(--muted);">fallado</span>'}
       </div>`;
-          });
-          html += `
+    });
+    html += `
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
         <div style="font-weight:600;color:var(--text);margin-bottom:6px;">🏆 Posiciones finales</div>
         ${specialRows}
       </div>`;
-        }
+  }
 
-        html += "</div>";
-        html += `
+  html += '</div>';
+  html += `
     <div style="margin-top:16px;padding:14px;background:linear-gradient(135deg,var(--accent)22,var(--accent2)22);border:1px solid var(--accent);border-radius:8px;text-align:center;">
       <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">PUNTUACIÓN TOTAL</div>
       <div style="font-size:36px;font-family:'Bebas Neue',sans-serif;color:var(--accent2);">${sc.total} pts</div>
     </div>`;
 
-        container.innerHTML = html;
-      }
+  container.innerHTML = html;
+}
       /* ── RESULTADOS REALES (vista lectura para no-admin) ── */
       function buildRealResults() {
         const c = document.getElementById("real-results-container");
@@ -4826,18 +4547,17 @@
         el.innerHTML = html;
       }
 
-      function calcScoreDetailed() {
+     function calcScoreDetailed() {
         const r = state.real;
         let total = 0;
         const breakdown = {};
-
+        
         let gpts = 0;
         Object.keys(GROUPS).forEach((g) => {
           const rr = r.groups?.[g] || {};
           const my = state.groups[g] || {};
           ["p1", "p2", "p3"].forEach((k) => {
-            if (my[k] != null && rr[k] != null && my[k] === rr[k])
-              gpts += PTS.groups;
+            if (my[k] != null && rr[k] != null && my[k] === rr[k]) gpts += PTS.groups;
           });
         });
         breakdown.groups = { pts: gpts, label: "Posiciones en grupos" };
@@ -4847,15 +4567,13 @@
           r32: getMyR32Teams(state),
           r16: state.r32 || [],
           qf: state.r16 || [],
-          sf: state.qf || [],
+          sf: state.qf || []
         };
 
-        [
-          ["r32", PTS.r32, "Clasificados a 16avos"],
-          ["r16", PTS.r16, "Clasificados a octavos"],
-          ["qf", PTS.qf, "Clasificados a cuartos"],
-          ["sf", PTS.sf, "Clasificados a semis"],
-        ].forEach(([stage, pts, label]) => {
+        [["r32", PTS.r32, "Clasificados a 16avos"], 
+         ["r16", PTS.r16, "Clasificados a octavos"], 
+         ["qf", PTS.qf, "Clasificados a cuartos"], 
+         ["sf", PTS.sf, "Clasificados a semis"]].forEach(([stage, pts, label]) => {
           const realList = (r[stage] || []).filter((x) => x);
           const myList = myPreds[stage].filter((x) => x);
           let sp = 0;
@@ -4867,48 +4585,29 @@
         });
 
         const mySF = state.sf || [];
-        const myQF = state.qf || [];
+        const myQF = state.qf || []; 
         const myFinal = state.final || [];
-        const mySFLosers = myQF.filter(
-          (t) => t && !mySF.some((win) => win && win.n === t.n),
-        );
+        const mySFLosers = myQF.filter(t => t && !mySF.some(win => win && win.n === t.n));
 
-        const rP3 = r.p3
-          ? teamByName(typeof r.p3 === "string" ? r.p3 : r.p3.n)
-          : null;
-        const rP4 = r.p4
-          ? teamByName(typeof r.p4 === "string" ? r.p4 : r.p4.n)
-          : null;
-        const rRunner = r.runner
-          ? teamByName(typeof r.runner === "string" ? r.runner : r.runner.n)
-          : null;
-        const rChamp = r.champion
-          ? teamByName(
-              typeof r.champion === "string" ? r.champion : r.champion.n,
-            )
-          : null;
-
-        let p3 = 0,
-          p4 = 0,
-          runner = 0,
-          champ = 0;
+        const rP3 = r.p3 ? teamByName(typeof r.p3 === "string" ? r.p3 : r.p3.n) : null;
+        const rP4 = r.p4 ? teamByName(typeof r.p4 === "string" ? r.p4 : r.p4.n) : null;
+        const rRunner = r.runner ? teamByName(typeof r.runner === "string" ? r.runner : r.runner.n) : null;
+        const rChamp = r.champion ? teamByName(typeof r.champion === "string" ? r.champion : r.champion.n) : null;
+        
+        let p3 = 0, p4 = 0, runner = 0, champ = 0;
         if (rP3 && mySFLosers.some((t) => t.n === rP3.n)) p3 = PTS.p3;
         if (rP4 && mySFLosers.some((t) => t.n === rP4.n)) p4 = PTS.p4;
-
-        const myFinalLoser = myFinal[0]
-          ? mySF.find((t) => t && t.n !== myFinal[0].n)
-          : null;
-        if (rRunner && myFinalLoser && myFinalLoser.n === rRunner.n)
-          runner = PTS.runner;
-        if (rChamp && myFinal[0] && myFinal[0].n === rChamp.n)
-          champ = PTS.champion;
-
+        
+        const myFinalLoser = myFinal[0] ? mySF.find((t) => t && t.n !== myFinal[0].n) : null;
+        if (rRunner && myFinalLoser && myFinalLoser.n === rRunner.n) runner = PTS.runner;
+        if (rChamp && myFinal[0] && myFinal[0].n === rChamp.n) champ = PTS.champion;
+        
         breakdown.p4 = { pts: p4, label: "4º puesto" };
         breakdown.p3 = { pts: p3, label: "3er puesto" };
         breakdown.runner = { pts: runner, label: "Subcampeón" };
         breakdown.champion = { pts: champ, label: "Campeón" };
         total += p3 + p4 + runner + champ;
-
+        
         return { total, breakdown };
       }
 
