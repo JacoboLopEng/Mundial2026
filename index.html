@@ -3284,23 +3284,26 @@ function resolveThirdsAssignment() {
   return null;
 }
       /* ── BRACKET ── */
-     const R32 = [
-  [ { type: "runner", group: "A" }, { type: "runner", group: "B" } ],
-  [ { type: "winner", group: "B" }, { type: "third", winnerGroup: "B" } ],
-  [ { type: "winner", group: "D" }, { type: "third", winnerGroup: "D" } ],
-  [ { type: "winner", group: "E" }, { type: "third", winnerGroup: "E" } ],
-  [ { type: "winner", group: "G" }, { type: "third", winnerGroup: "G" } ],
-  [ { type: "runner", group: "E" }, { type: "runner", group: "I" } ],
-  [ { type: "winner", group: "A" }, { type: "third", winnerGroup: "A" } ],
-  [ { type: "winner", group: "L" }, { type: "third", winnerGroup: "L" } ],
-  [ { type: "runner", group: "K" }, { type: "runner", group: "L" } ],
-  [ { type: "winner", group: "I" }, { type: "third", winnerGroup: "I" } ],
-  [ { type: "winner", group: "F" }, { type: "runner", group: "C" } ],
-  [ { type: "winner", group: "H" }, { type: "runner", group: "J" } ],
-  [ { type: "winner", group: "C" }, { type: "runner", group: "F" } ],
-  [ { type: "winner", group: "J" }, { type: "runner", group: "H" } ],
-  [ { type: "winner", group: "K" }, { type: "third", winnerGroup: "K" } ],
-  [ { type: "runner", group: "D" }, { type: "runner", group: "G" } ],
+const R32 = [
+  // ─── MITAD IZQUIERDA ───
+  [ { type: "winner", group: "E" }, { type: "third", winnerGroup: "E" } ], // 1. 1ºE vs 3º
+  [ { type: "winner", group: "I" }, { type: "third", winnerGroup: "I" } ], // 2. 1ºI vs 3º
+  [ { type: "runner", group: "A" }, { type: "runner", group: "B" } ],      // 3. 2ºA vs 2ºB
+  [ { type: "winner", group: "F" }, { type: "runner", group: "C" } ],      // 4. 1ºF vs 2ºC
+  [ { type: "runner", group: "K" }, { type: "runner", group: "L" } ],      // 5. 2ºK vs 2ºL
+  [ { type: "winner", group: "H" }, { type: "runner", group: "J" } ],      // 6. 1ºH vs 2ºJ
+  [ { type: "winner", group: "D" }, { type: "third", winnerGroup: "D" } ], // 7. 1ºD vs 3º
+  [ { type: "winner", group: "G" }, { type: "third", winnerGroup: "G" } ], // 8. 1ºG vs 3º
+
+  // ─── MITAD DERECHA ───
+  [ { type: "winner", group: "C" }, { type: "runner", group: "F" } ],      // 9. 1ºC vs 2ºF
+  [ { type: "runner", group: "E" }, { type: "runner", group: "I" } ],      // 10. 2ºE vs 2ºI
+  [ { type: "winner", group: "A" }, { type: "third", winnerGroup: "A" } ], // 11. 1ºA vs 3º
+  [ { type: "winner", group: "L" }, { type: "third", winnerGroup: "L" } ], // 12. 1ºL vs 3º
+  [ { type: "winner", group: "J" }, { type: "runner", group: "H" } ],      // 13. 1ºJ vs 2ºH
+  [ { type: "runner", group: "D" }, { type: "runner", group: "G" } ],      // 14. 2ºD vs 2ºG
+  [ { type: "winner", group: "B" }, { type: "third", winnerGroup: "B" } ], // 15. 1ºB vs 3º
+  [ { type: "winner", group: "K" }, { type: "third", winnerGroup: "K" } ], // 16. 1ºK vs 3º
 ];
       const R16_PAIRS = [
         [0, 1],
@@ -3323,18 +3326,24 @@ function resolveThirdsAssignment() {
         [2, 3],
       ];
 
-      function resolveTeam(src) {
+     function resolveTeam(src) {
   if (!src) return null;
   if (src.type === "winner") return getTeam(src.group, 1);
   if (src.type === "runner") return getTeam(src.group, 2);
+  
   if (src.type === "third") {
     const assignment = resolveThirdsAssignment();
     if (!assignment) return null;
+    
+    // Buscamos el índice basándonos en el grupo del ganador (ej: "E")
     const idx = THIRD_MATCHUP_WINNERS.indexOf(src.winnerGroup);
     if (idx === -1) return null;
-    const thirdGroup = assignment[idx];
+    
+    // Obtenemos qué grupo es el 3º clasificado según el algoritmo FIFA
+    const thirdGroup = assignment[idx]; 
     return getTeam(thirdGroup, 3);
   }
+  
   if (src.type === "mw") {
     const arr = state[src.stage];
     return arr && arr[src.idx] ? arr[src.idx] : null;
